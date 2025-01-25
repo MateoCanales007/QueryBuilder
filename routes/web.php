@@ -7,14 +7,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/test/pedidos-usuario-2', [TestController::class, 'pedidosUsuario2']);
-Route::get('/test/pedidos-con-usuarios', [TestController::class, 'pedidosConUsuarios']);
-Route::get('/test/pedidos-en-rango', [TestController::class, 'pedidosEnRango']);
-Route::get('/test/usuarios-con-r', [TestController::class, 'usuariosConR']);
-Route::get('/test/total-pedidos-usuario-5', [TestController::class, 'totalPedidosUsuario5']);
-Route::get('/test/pedidos-ordenados-por-total', [TestController::class, 'pedidosOrdenadosPorTotal']);
-Route::get('/test/suma-total-pedidos', [TestController::class, 'sumaTotalPedidos']);
-Route::get('/test/pedido-mas-economico', [TestController::class, 'pedidoMasEconomico']);
-Route::get('/test/pedidos-agrupados-por-usuario', [TestController::class, 'pedidosAgrupadosPorUsuario']);
-
-Route::get('/test/debug', [TestController::class, 'debug']);
+Route::prefix('test')->group(function () {
+    Route::get('/pedidos-usuario/{id}', [TestController::class, 'pedidosUsuario'])->name('test.pedidos-usuario');
+    Route::get('/pedidos-con-usuarios', [TestController::class, 'pedidosConUsuarios'])->name('test.pedidos-con-usuarios');
+    Route::get('/pedidos-en-rango/{min}/{max}', [TestController::class, 'pedidosEnRango'])->name('test.pedidos-en-rango');
+    Route::get('/usuarios-con-letra/{letra}', [TestController::class, 'usuariosConLetra'])->name('test.usuarios-con-letra');
+    Route::get('/total-pedidos-usuario/{id}', [TestController::class, 'totalPedidosUsuario'])->name('test.total-pedidos-usuario');
+    Route::get('/pedidos-ordenados-por-total', [TestController::class, 'pedidosOrdenadosPorTotal'])->name('test.pedidos-ordenados-por-total');
+    Route::get('/suma-total-pedidos', [TestController::class, 'sumaTotalPedidos'])->name('test.suma-total-pedidos');
+    Route::get('/pedido-mas-economico', [TestController::class, 'pedidoMasEconomico'])->name('test.pedido-mas-economico');
+    Route::get('/pedidos-agrupados-por-usuario', [TestController::class, 'pedidosAgrupadosPorUsuario'])->name('test.pedidos-agrupados-por-usuario');
+});
