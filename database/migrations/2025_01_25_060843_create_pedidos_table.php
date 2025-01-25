@@ -16,7 +16,7 @@ return new class extends Migration
             $table -> string ('producto');
             $table -> string ('cantidad');
             $table -> string ('total', 10, 2);
-            $table -> foreignId ('id_usuario') -> references('id') -> on('usuarios');
+            $table->foreignId('id_usuario')->constrained('usuarios');
             $table->timestamps();
         });
     }

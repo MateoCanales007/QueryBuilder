@@ -4,41 +4,82 @@ namespace App\Http\Controllers;
 
 use App\Models\Usuario;
 use App\Models\Pedido;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TestController extends Controller
 {
-    public function testUsuariosConPedidos()
+    // 2. Recupera todos los pedidos asociados al usuario con ID 2.
+    public function pedidosUsuario2()
     {
-        $usuarios = Usuario::with('pedidos')->get();
-        // esto lo que hace es traer todos los usuarios con sus pedidos asociados
-        return response()->json($usuarios);
-    }
-
-    public function testPedidosDeUsuario($userId)
-    {
-        $pedidos = Pedido::where('id_usuario', $userId)->get();
-        // esto lo que hace es traer todos los pedidos de un usuario específico
+        $pedidos = Pedido::where('id_usuario', 2)->get();
         return response()->json($pedidos);
     }
 
-    public function testTotalPedidosPorUsuario()
+    // 3. Obtén la información detallada de los pedidos, incluyendo el nombre y correo electrónico de los usuarios.
+    public function pedidosConUsuarios()
     {
-        $totalPedidos = DB::table('usuarios')
-            // esto es para hacer un join entre la tabla usuarios y pedidos
-            ->leftJoin('pedidos', 'usuarios.id', '=', 'pedidos.id_usuario')
-            // el select es para traer el nombre del usuario y el total de pedidos
-            ->select('usuarios.nombre', DB::raw('COUNT(pedidos.id) as total_pedidos'))
-            // agrupamos por el id del usuario y el nombre
-            ->groupBy('usuarios.id', 'usuarios.nombre')
-            // obtenemos los resultados
-            ->get();
-        // esto lo que hace es traer el total de pedidos por usuario
-        return response()->json($totalPedidos);
+        $pedidos = Pedido::with('usuario:id,nombre,correo')->get();
+        return response()->json($pedidos);
     }
 
-    public function verificarDatos()
+    // 4. Recupera todos los pedidos cuyo total esté en el rango de $100 a $250.
+    public function pedidosEnRango()
+    {
+        $pedidos = Pedido::whereBetween('total', [100, 250])->get();
+        return response()->json($pedidos);
+    }
+
+    // 5. Encuentra todos los usuarios cuyos nombres comiencen con la letra "R".
+    public function usuariosConR()
+    {
+        $usuarios = Usuario::where('nombre', 'like', 'R%')->get();
+        return response()->json($usuarios);
+    }
+
+    // 6. Calcula el total de registros en la tabla de pedidos para el usuario con ID 5.
+    public function totalPedidosUsuario5()
+    {
+        $total = Pedido::where('id_usuario', 5)->count();
+        return response()->json(['total_pedidos' => $total]);
+    }
+
+    // 7. Recupera todos los pedidos junto con la información de los usuarios, ordenándolos de forma descendente según el total del pedido.
+    public function pedidosOrdenadosPorTotal()
+    {
+        $pedidos = Pedido::with('usuario')->orderBy('total', 'desc')->get();
+        return response()->json($pedidos);
+    }
+
+    // 8. Obtén la suma total del campo "total" en la tabla de pedidos.
+    public function sumaTotalPedidos()
+    {
+        $suma = Pedido::sum('total');
+        return response()->json(['suma_total' => $suma]);
+    }
+
+    // 9. Encuentra el pedido más económico, junto con el nombre del usuario asociado.
+    public function pedidoMasEconomico()
+    {
+        $pedido = Pedido::with('usuario:id,nombre')->orderBy('total', 'asc')->first();
+        return response()->json($pedido);
+    }
+
+    // 10. Obtén el producto, la cantidad y el total de cada pedido, agrupándolos por usuario.
+    public function pedidosAgrupadosPorUsuario()
+    {
+        $pedidos = Usuario::with(['pedidos:id,producto,cantidad,total,id_usuario'])
+            ->get()
+            ->map(function ($usuario) {
+                return [
+                    'usuario' => $usuario->nombre,
+                    'pedidos' => $usuario->pedidos
+                ];
+            });
+        return response()->json($pedidos);
+    }
+
+
+    public function debug()
     {
         $usuarios = Usuario::all();
         $pedidos = Pedido::all();
@@ -46,20 +87,5 @@ class TestController extends Controller
             'usuarios' => $usuarios,
             'pedidos' => $pedidos
         ]);
-    }
-
-    public function pedidosDeUsuario($id)
-    {
-        $pedidos = Pedido::where('id_usuario', $id)->get();
-        if ($pedidos->isEmpty()) {
-            return response()->json(['mensaje' => "No se encontraron pedidos para el usuario $id"], 404);
-        }
-        return response()->json($pedidos);
-    }
-
-    public function estructuraTabla()
-    {
-        $estructura = DB::getSchemaBuilder()->getColumnListing('pedidos');
-        return response()->json($estructura);
     }
 }
